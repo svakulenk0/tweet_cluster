@@ -13,6 +13,7 @@ from preprocessing.preprocess import get_corpus
 
 from collections import Counter
 import numpy
+import os
 
 from gensim import corpora, models, matutils
 import fastcluster
@@ -36,15 +37,19 @@ def hclust(X, max_d=1.0, distance_metric='euclidean'):
     print "n_clusters:", len(freqTwCl)
     npindL = numpy.array(cluster_ids)
     clusters = []
-    for cl, freq in freqTwCl.most_common(5):
+    for cl, freq in freqTwCl.most_common():
         clidx = (npindL == cl).nonzero()[0].tolist()
         clusters.append(clidx)
     return clusters
 
 
 def test_hclust():
-    user = 'AxelPolleres'
-    ndocs = 150
+    '''
+    Demonstrates how to cluster tweets retrieved from the timeline of a specified Twitter user,
+    e.g. @realDonaldTrump @HillaryClinton @AxelPolleres @webLyzard
+    '''
+    user = 'realDonaldTrump'
+    ndocs = 20
     data_path = 'data/'
     corpus_filename = data_path + user + str(ndocs) + '.mm'
     dict_filename = data_path + user + str(ndocs) + '.dict'
@@ -53,6 +58,8 @@ def test_hclust():
         # print len(corpus)
         dictionary = corpora.Dictionary.load(dict_filename)
     except:
+        if not os.path.exists(data_path):
+            os.makedirs(data_path)
         get_corpus('@' + user, ndocs,
                    corpus_filename, dict_filename, show_documents=True, filter_eng=False)
     corpus_tfidf = generate_tfidf(corpus)
