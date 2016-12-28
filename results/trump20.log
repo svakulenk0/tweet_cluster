@@ -1,0 +1,33 @@
+20 input documents
+15 documents left after pre-processing 
+Dictionary(12 unique tokens: [u'raised', u'united', u'djt', u'u.s.', u'million']...)
+
+0 not anymore. The beginning of the end was the horrible Iran deal, and now this (U.N.)! Stay strong Israel, January 20th is fast approaching!
+1 We cannot continue to let Israel be treated with such total disdain and disrespect. They used to have a great friend in the U.S., but.......
+2 The U.S. Consumer Confidence Index for December surged nearly four points to 113.7, THE HIGHEST LEVEL IN MORE THAN 15 YEARS! Thanks Donald!
+3 President Obama campaigned hard (and personally) in the very important swing states, and lost.The voters wanted to MAKE AMERICA GREAT AGAIN!
+4 The DJT Foundation, unlike most foundations, never paid fees, rent, salaries or any expenses. 100% of money goes to wonderful charities!
+5 I gave millions of dollars to DJT Foundation, raised or recieved millions more, ALL of which is given to charity, and media won't report!
+6 The world was gloomy before I won - there was no hope. Now the market is up nearly 10% and Christmas spending is over a trillion dollars!
+7 The United Nations has such great potential but right now it is just a club for people to get together, talk and have a good time. So sad!
+8 President Obama said that he thinks he would have won against me. He should say that but I say NO WAY! - jobs leaving, ISIS, OCare, etc.
+9 Merry Christmas and a very, very, very , very Happy New Year to everyone!
+10 The big loss yesterday for Israel in the United Nations will make it much harder to negotiate peace.Too bad, but we will get it done anyway!
+11 slaughter you. This is a purely religious threat, which turned into reality. Such hatred! When will the U.S., and all countries, fight back?
+12 The terrorist who killed so many people in Germany said just before crime, "by God's will we will slaughter you pigs, I swear, we will......
+13 As to the U.N., things will be different after Jan. 20th.
+14 my presidency. Isn't this a ridiculous shame? He loves these kids, has raised millions of dollars for them, and now must stop. Wrong answer!
+
+(15, 12)
+max_d =  1.0
+n_clusters: 8
+Clusters: [[6, 9], [5, 14], [3, 8], [11, 12], [1, 2], [7, 10], [0, 13], [4]]
+Counter({u'christmas': 2, u'dollar': 1})
+Counter({u'raised': 2, u'million': 2, u'dollar': 2, u'djt': 1})
+Counter({u'obama': 2})
+Counter({u'slaughter': 2, u'u.s.': 1})
+Counter({u'u.s.': 2, u'israel': 1})
+Counter({u'united': 2, u'nation': 2, u'israel': 1})
+Counter({u'20th': 2, u'israel': 1})
+Counter({u'djt': 1})
+[Finished in 1.3s]
