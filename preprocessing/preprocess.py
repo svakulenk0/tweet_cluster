@@ -63,7 +63,7 @@ def preprocess(documents, custom=[]):
     # documents = [doc for doc in documents if len(doc) > 100]
 
     # Tokenize
-    documents = [tokenizeRawTweetText(doc.lower()) for doc in documents]
+    documents = [set(tokenizeRawTweetText(doc.lower())) for doc in documents]
     # print documents
 
     # Remove stop words
