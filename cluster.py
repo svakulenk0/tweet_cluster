@@ -25,7 +25,10 @@ def generate_tfidf(corpus):
     return tfidf[corpus]
 
 
-def hclust(X, max_d=1.0, distance_metric='euclidean'):
+def cluster_corpus(corpus, dictionary, max_d=1.0, distance_metric='euclidean'):
+    corpus_tfidf = generate_tfidf(corpus)
+    array = matutils.corpus2csc(corpus_tfidf).toarray()
+    X = array.T
     # print X
     print X.shape
     # cluster_ids = fclusterdata(X, max_d, criterion='distance')
@@ -40,6 +43,9 @@ def hclust(X, max_d=1.0, distance_metric='euclidean'):
     for cl, freq in freqTwCl.most_common():
         clidx = (npindL == cl).nonzero()[0].tolist()
         clusters.append(clidx)
+    print "Clusters:", clusters
+    for cluster in clusters:
+        print Counter([dictionary[word] for doc_id in cluster for word, score in corpus_tfidf[doc_id]])
     return clusters
 
 
@@ -60,15 +66,10 @@ def test_hclust():
     except:
         if not os.path.exists(data_path):
             os.makedirs(data_path)
-        get_user_tweets('@' + user, ndocs,
-                   corpus_filename, dict_filename, show_documents=True, filter_eng=False)
-    corpus_tfidf = generate_tfidf(corpus)
-    array = matutils.corpus2csc(corpus_tfidf).toarray()
-    X = array.T
-    clusters = hclust(X)
-    print "Clusters:", clusters
-    for cluster in clusters:
-        print Counter([dictionary[word] for doc_id in cluster for word, score in corpus_tfidf[doc_id]])
+        corpus, dictionary = get_user_tweets('@' + user, ndocs,
+                                             corpus_filename, dict_filename)
+
+    clusters = cluster_corpus(corpus, dictionary)
 
 
 if __name__ == '__main__':
