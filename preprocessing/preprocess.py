@@ -45,14 +45,20 @@ def get_hashtag_tweets(hashtag, ndocs, result_type, language_code, corpus_filena
                                    count=ndocs, lang=language_code)['statuses']
     documents = [tw['text'] for tw in tweets]
     print(str(len(documents)) + " input documents")
-    generate_corpus(documents, dict_filename, corpus_filename, documents)
+    # print documents
+    # print hashtag
+    corpus, dictionary = generate_corpus(documents, dict_filename, corpus_filename, documents, [hashtag.lower().lstrip('#')])
+    # print corpus
+    # print dictionary
+    return (corpus, dictionary)
 
 
-def preprocess(documents):
+def preprocess(documents, custom=[]):
     # Remove urls: http? bug fixed (SV)
     documents = [re.sub(r"(?:\@|https?\://)\S+", "", doc)
                  for doc in documents]
-
+    # remove duplicate tweets
+    documents = set(documents)
     # Remove documents with less 100 words (some tweets contain only URLs)
     # documents = [doc for doc in documents if len(doc) > 100]
 
@@ -64,10 +70,12 @@ def preprocess(documents):
     unigrams = [w for doc in documents for w in doc if len(w) == 1]
     bigrams = [w for doc in documents for w in doc if len(w) == 2]
     # print bigrams
+    # print custom  + STOPLIST
     stoplist = set(nltk.corpus.stopwords.words(
-                   "english") + STOPLIST_TW + STOPLIST + unigrams + bigrams)
+                   "english") + STOPLIST_TW + unigrams + bigrams + custom)
+    # print stoplist
     # and strip #
-    documents = [[token.lstrip('#') for token in doc if token not in stoplist]
+    documents = [[token.lstrip('#') for token in doc if token.lstrip('#') not in stoplist]
                  for doc in documents]
 
     # remove punctuation tokens
@@ -94,8 +102,8 @@ def preprocess(documents):
     return documents
 
 
-def generate_corpus(documents, dict_filename, corpus_filename, tweets, show_documents=True):
-    documents = preprocess(documents)
+def generate_corpus(documents, dict_filename, corpus_filename, tweets, stoplist=[], show_documents=True):
+    documents = preprocess(documents, stoplist)
     # Sort words in documents
     for doc in documents:
         doc.sort()
@@ -126,6 +134,7 @@ def generate_corpus(documents, dict_filename, corpus_filename, tweets, show_docu
     # print documents
     # save in Market Matrix format
     corpora.MmCorpus.serialize(corpus_filename, corpus)
+    return (corpus, dictionary)
 
 
 def get_user_tweets(user, ndocs,
@@ -144,6 +153,7 @@ def get_user_tweets(user, ndocs,
                  if ('lang' in tw.keys()) and (tw['lang'] in ('en', 'und'))]
     print(str(len(documents)) + " input documents")
     generate_corpus(documents, dict_filename, corpus_filename, documents)
+
 
 class TestCorpusGenerators(unittest.TestCase):
     def test_get_user_tweets(self):
