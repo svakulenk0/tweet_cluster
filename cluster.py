@@ -45,11 +45,13 @@ def cluster_corpus(corpus, dictionary, max_d=1.0, distance_metric='euclidean'):
         clusters.append(clidx)
     print "Clusters:", clusters
     for cluster in clusters:
-        print Counter([dictionary[word] for doc_id in cluster for word, score in corpus_tfidf[doc_id]])
+        keywords = Counter([dictionary[word] for doc_id in cluster for word, score in corpus_tfidf[doc_id]])
+        if keywords.most_common()[0][1] > 1:
+            print keywords
     return clusters
 
 
-def test_hclust():
+def test_cluster_corpus():
     '''
     Demonstrates how to cluster tweets retrieved from the timeline of a specified Twitter user,
     e.g. @realDonaldTrump @HillaryClinton @AxelPolleres @webLyzard
@@ -66,11 +68,9 @@ def test_hclust():
     except:
         if not os.path.exists(data_path):
             os.makedirs(data_path)
-        corpus, dictionary = get_user_tweets('@' + user, ndocs,
-                                             corpus_filename, dict_filename)
-
+        corpus, dictionary = get_user_tweets('@' + user, ndocs, corpus_filename, dict_filename)
     clusters = cluster_corpus(corpus, dictionary)
 
 
 if __name__ == '__main__':
-    test_hclust()
+    test_cluster_corpus()
