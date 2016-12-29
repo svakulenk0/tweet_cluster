@@ -26,27 +26,29 @@ from twitter_settings import *
 from stoplist_twitter import STOPLIST_TW
 from frequent_words import STOPLIST
 
+import unittest
 
-def get_corpus(user, ndocs,
-               corpus_filename, dict_filename, show_documents=False, filter_eng=False):
+
+def get_hashtag_tweets(hashtag, ndocs, result_type, language_code, corpus_filename, dict_filename):
+    '''
+    Filter out only the original tweets excluding replies and retweets
+    type: recent, popular, mixed
+    ndocs (max 100)
+    '''
     # connect to Twitter Search API
     twitter_client = Twython(APP_KEY, APP_SECRET,
                              OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
 
-    # retrieve user timeline (our corpus)
-    user_timeline = twitter_client.get_user_timeline(screen_name=user,
-                                                     count=ndocs)
-
-    # tweet preprocessing:
-    # Filter out non-english tweets
-    documents = [tw['text'] for tw in user_timeline
-                 if ('lang' in tw.keys()) and (tw['lang'] in ('en', 'und'))]
+    request = hashtag + " -filter:retweets AND -filter:replies"
+    # retrieve tweets
+    tweets = twitter_client.search(q=request, result_type=result_type, include_entities='true',
+                                   count=ndocs, lang=language_code)['statuses']
+    documents = [tw['text'] for tw in tweets]
     print(str(len(documents)) + " input documents")
-    if filter_eng:
-        #  Filter non english documents
-        documents = filter_lang('en', documents)
-        print(str(len(documents)) + " documents in english ")
-    tweets = documents
+    generate_corpus(documents, dict_filename, corpus_filename, documents)
+
+
+def preprocess(documents):
     # Remove urls: http? bug fixed (SV)
     documents = [re.sub(r"(?:\@|https?\://)\S+", "", doc)
                  for doc in documents]
@@ -88,17 +90,19 @@ def get_corpus(user, ndocs,
     documents = [[token for token in doc if token_frequency[token] > 1]
                  for doc in documents]
 
+    # print documents
+    return documents
+
+
+def generate_corpus(documents, dict_filename, corpus_filename, tweets, show_documents=True):
+    documents = preprocess(documents)
     # Sort words in documents
     for doc in documents:
         doc.sort()
-    # print documents
-    ##########################################
-
     # format corpus and dictionary for Gensim:
     # Build a dictionary where for each document each word has its own id
     dictionary = corpora.Dictionary(documents)
     dictionary.compactify()
-
 
     # Build the corpus: vectors with occurence of each word for each document
     # convert tokenized documents to vectors
@@ -112,7 +116,6 @@ def get_corpus(user, ndocs,
     # print corpus
     # save the dictionary for future use
     dictionary.save(dict_filename)
-    assert len(documents) == len(tweets)
     # show only tweets that do not have an empty bag and were used for modeling
     if show_documents:
         counter = 0
@@ -125,18 +128,46 @@ def get_corpus(user, ndocs,
     corpora.MmCorpus.serialize(corpus_filename, corpus)
 
 
-def test_get_corpus():
-    user = 'AxelPolleres'
-    ndocs = 100
-    data_path = '../data/'
-    corpus_filename = data_path + user + str(ndocs) + '.mm'
-    dict_filename = data_path + user + str(ndocs) + '.dict'
-    get_corpus('@' + user, ndocs,
-               corpus_filename, dict_filename, show_documents=True, filter_eng=False)
-    corpus = corpora.MmCorpus(corpus_filename)
-    dictionary = corpora.Dictionary.load(dict_filename)
+def get_user_tweets(user, ndocs,
+                    corpus_filename, dict_filename):
+    # connect to Twitter Search API
+    twitter_client = Twython(APP_KEY, APP_SECRET,
+                             OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
+
+    # retrieve user timeline (our corpus)
+    user_timeline = twitter_client.get_user_timeline(screen_name=user,
+                                                     count=ndocs)
+
+    # tweet preprocessing:
+    # Filter out non-english tweets
+    documents = [tw['text'] for tw in user_timeline
+                 if ('lang' in tw.keys()) and (tw['lang'] in ('en', 'und'))]
+    print(str(len(documents)) + " input documents")
+    generate_corpus(documents, dict_filename, corpus_filename, documents)
+
+class TestCorpusGenerators(unittest.TestCase):
+    def test_get_user_tweets(self):
+        user = 'AxelPolleres'
+        ndocs = 100
+        data_path = '../data/'
+        corpus_filename = data_path + user + str(ndocs) + '.mm'
+        dict_filename = data_path + user + str(ndocs) + '.dict'
+        get_user_tweets('@' + user, ndocs,
+                        corpus_filename, dict_filename)
+        corpus = corpora.MmCorpus(corpus_filename)
+        dictionary = corpora.Dictionary.load(dict_filename)
+
+    def test_get_hashtag_tweets(self):
+        hashtag = 'PieceofthePieContest'
+        ndocs = 100
+        data_path = '../data/'
+        corpus_filename = data_path + hashtag + str(ndocs) + '.mm'
+        dict_filename = data_path + hashtag + str(ndocs) + '.dict'
+        get_hashtag_tweets('#'+hashtag, ndocs, 'mixed', 'en',
+                           corpus_filename, dict_filename)
+        corpus = corpora.MmCorpus(corpus_filename)
+        dictionary = corpora.Dictionary.load(dict_filename)
 
 
 if __name__ == '__main__':
-    test_get_corpus()
-
+    unittest.main()

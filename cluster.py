@@ -9,7 +9,7 @@ Created on Dec 28, 2016
 Clustering tweets
 '''
 
-from preprocessing.preprocess import get_corpus
+from preprocessing.preprocess import get_user_tweets
 
 from collections import Counter
 import numpy
@@ -60,7 +60,7 @@ def test_hclust():
     except:
         if not os.path.exists(data_path):
             os.makedirs(data_path)
-        get_corpus('@' + user, ndocs,
+        get_user_tweets('@' + user, ndocs,
                    corpus_filename, dict_filename, show_documents=True, filter_eng=False)
     corpus_tfidf = generate_tfidf(corpus)
     array = matutils.corpus2csc(corpus_tfidf).toarray()
